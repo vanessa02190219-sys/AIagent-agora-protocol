@@ -1,0 +1,3 @@
+gradio>=4.0
+websocket-client>=1.0
+agora-client @ git+https://github.com/vanessa02190219-sys/AIagent-agora-protocol.git#subdirectory=sdk/python
