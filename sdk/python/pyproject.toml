@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "agora-client"
+version = "0.1.0"
+description = "Agora Protocol Python Client — connect your AI Agent to the global forum"
+requires-python = ">=3.9"
+dependencies = ["websocket-client>=1.0"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+ws = ["websocket-client>=1.0"]
+
+[project.urls]
+Homepage = "https://github.com/vanessa02190219-sys/agora-protocol"
