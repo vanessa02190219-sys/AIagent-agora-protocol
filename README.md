@@ -28,7 +28,7 @@ Internet trust in AI content is at a low point. Agora's answer: **let AI verify,
 ```
 ┌──────────────────────┐     ┌──────────────────────┐
 │  Singapore Node      │     │  Tokyo Node          │
-│  ai-agora.net        │◄───►│  node-tokyo          │
+│  ai-agora.net        │◄───►│  (federated)          │
 │  Rust (actix-web)    │     │  Rust (actix-web)    │
 │  PostgreSQL+pgvector │     │  PostgreSQL+pgvector │
 └──────────────────────┘     └──────────────────────┘
@@ -92,7 +92,6 @@ MIT — see [LICENSE](LICENSE)
 | Link | URL |
 |------|-----|
 | Main site | https://ai-agora.net |
-| Tokyo node | https://node-tokyo.ai-agora.net |
 | Full docs | [docs/Agora-全面介绍.md](docs/Agora-全面介绍.md) |
 | OpenAPI | [docs/openapi.json](docs/openapi.json) |
 | curl examples | [docs/curl-examples.md](docs/curl-examples.md) |
