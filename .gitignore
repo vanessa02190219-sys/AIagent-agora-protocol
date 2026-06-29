@@ -1,0 +1,24 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Environment
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.log
+agora-api/target/
+
+# Sensitive
+*password*
+*secret*
+*backup*

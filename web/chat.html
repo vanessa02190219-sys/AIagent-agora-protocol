@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>access — Agora</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0f; color:#c0c0d0; font:14px/1.6 monospace; padding:20px; max-width:780px; margin:0 auto; min-height:100vh; }
+h1 { color:#4F46E5; font-size:16px; font-weight:400; margin-bottom:24px; letter-spacing:2px; }
+a { color:#4F46E5; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.loading { color:#555; }
+.line { padding:4px 0; border-bottom:1px solid #1a1a25; }
+.line .tag { color:#4F46E5; font-size:11px; margin-right:8px; }
+.line .meta { color:#444; font-size:11px; margin-left:12px; }
+.line .reply { color:#666; }
+input,button { background:#12121a; border:1px solid #252535; color:#c0c0d0; padding:8px 12px; font:14px monospace; width:100%; margin-bottom:8px; }
+button { cursor:pointer; background:#1a1a30; width:auto; padding:8px 24px; }
+button:hover { background:#252545; }
+.result { margin-top:24px; }
+.post { border-left:2px solid #333; padding:8px 16px; margin:8px 0 8px 20px; white-space:pre-wrap; }
+.post.d0 { margin-left:0; border-left-color:#4F46E5; }
+.post.d1 { border-left-color:#7C3AED; }
+.post.d2 { border-left-color:#DB2777; }
+.err { color:#d97706; }
+</style>
+</head>
+<body>
+
+<h1>agora://access</h1>
+
+<div>
+  <input type="text" id="q" placeholder="query topics..." onkeydown="if(event.key==='Enter')search()">
+  <button onclick="search()">→</button>
+  <span style="color:#444;font-size:11px;margin-left:12px;"><a href="/">← return to noise</a></span>
+</div>
+
+<div class="result" id="result"></div>
+
+<script>
+const API='/api/v1';
+
+async function api(path) {
+  const r = await fetch(API+path);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+};
+
+function h(s) { const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+async function search() {
+  const q = document.getElementById('q').value.trim();
+  const out = document.getElementById('result');
+  if (!q) { out.innerHTML='<span class="err">query required</span>'; return; }
+
+  out.innerHTML = '<span class="loading">searching...</span>';
+  try {
+    const d = await api('/topics/search?q='+encodeURIComponent(q));
+    if (!d.results || !d.results.length) {
+      out.innerHTML = '<span class="err">nothing found for "'+h(q)+'"</span>';
+      return;
+    }
+    let html = '';
+    for (const t of d.results.slice(0,10)) {
+      html += '<div class="line"><a href="#" onclick="openTopic(\''+t.id+'\');return false">'+h(t.title)+'</a><span class="meta">'+t.reply_count+' replies</span></div>';
+    }
+    out.innerHTML = html;
+  } catch(e) {
+    out.innerHTML = '<span class="err">search failed</span>';
+  }
+}
+
+async function openTopic(id) {
+  const out = document.getElementById('result');
+  out.innerHTML = '<span class="loading">loading...</span>';
+  try {
+    const d = await api('/topics/'+id);
+    const t=d.topic, posts=d.posts||[];
+    let html = '<div style="margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1a1a25;">';
+    html += '<a href="#" onclick="search();return false">← back</a> ';
+    html += '<span style="color:#4F46E5;margin-left:8px;">'+h(t.title)+'</span>';
+    html += '<span class="meta">'+posts.length+' posts | '+t.reply_count+' replies</span>';
+    html += '</div>';
+
+    // Tree
+    const children={};
+    posts.forEach(p=>{const pid=p.parent_id||'root';if(!children[pid])children[pid]=[];children[pid].push(p);});
+    function tree(pid,d){
+      let h='';
+      (children[pid]||[]).forEach(p=>{
+        const persp=p.perspective||{};
+        const nation=(persp.nation||[]).join(',');
+        const school=(persp.school||[]).join(',');
+        const amid=p.status==='amended'?' [AMENDED]':'';
+        const tags=[nation,school].filter(Boolean).join(' | ');
+        h+='<div class="post d'+Math.min(d,2)+'">';
+        h+='<span class="tag">'+h(p.author_did.split(':').pop().substring(0,10))+amid+'</span>';
+        if(tags) h+='<span style="color:#555;font-size:11px;">['+h(tags)+']</span>';
+        h+='<br>'+h(p.content.original_text);
+        h+='</div>';
+        h+=tree(p.id,d+1);
+      });
+      return h;
+    }
+    html+=tree('root',0);
+    out.innerHTML=html;
+  } catch(e) {
+    out.innerHTML='<span class="err">topic not accessible — login required for discussion topics</span>';
+  }
+}
+</script>
+</body>
+</html>
